@@ -7,11 +7,12 @@
 //
 
 import UIKit
-import MediaPlayer
+import AVKit
+import AVFoundation
 
 class ViewController: UIViewController {
 
-    var moviePlayer: MPMoviePlayerController!
+    var moviePlayer: AVPlayer!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -19,22 +20,28 @@ class ViewController: UIViewController {
         // Load the video from the app bundle.
         let videoURL: NSURL = NSBundle.mainBundle().URLForResource("video", withExtension: "mov")!
         
-        // Create and configure the movie player.
-        self.moviePlayer = MPMoviePlayerController(contentURL: videoURL)
+        self.moviePlayer = AVPlayer(URL: videoURL)
+        self.moviePlayer.muted = true //unmute if you want
         
-        self.moviePlayer.controlStyle = MPMovieControlStyle.None
-        self.moviePlayer.scalingMode = MPMovieScalingMode.AspectFill
-        
-        self.moviePlayer.view.frame = self.view.frame
-        self.view .insertSubview(self.moviePlayer.view, atIndex: 0)
-        
+        let playerLayer = AVPlayerLayer(player: self.moviePlayer)
+        playerLayer.videoGravity = AVLayerVideoGravityResizeAspectFill
+        playerLayer.zPosition = -1
+
+        playerLayer.frame = self.view.frame
+
+        self.view.layer.addSublayer(playerLayer)
+
         self.moviePlayer.play()
-        
-        // Loop video.
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "loopVideo", name: MPMoviePlayerPlaybackDidFinishNotification, object: self.moviePlayer)
-    }
+            
+        //loop video
+        NSNotificationCenter.defaultCenter().addObserver(self,
+            selector: "loopVideo",
+            name: AVPlayerItemDidPlayToEndTimeNotification,
+            object: self.moviePlayer.currentItem)
+     }
     
     func loopVideo() {
+        self.moviePlayer.seekToTime(kCMTimeZero)
         self.moviePlayer.play()
     }
 
