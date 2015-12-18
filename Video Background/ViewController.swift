@@ -12,7 +12,7 @@ import AVFoundation
 
 class ViewController: UIViewController {
 
-    var moviePlayer: AVPlayer!
+    var player: AVPlayer?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -20,29 +20,30 @@ class ViewController: UIViewController {
         // Load the video from the app bundle.
         let videoURL: NSURL = NSBundle.mainBundle().URLForResource("video", withExtension: "mov")!
         
-        self.moviePlayer = AVPlayer(URL: videoURL)
-        self.moviePlayer.muted = true //unmute if you want
+        player = AVPlayer(URL: videoURL)
+        player?.actionAtItemEnd = .None
+        player?.muted = true
         
-        let playerLayer = AVPlayerLayer(player: self.moviePlayer)
+        let playerLayer = AVPlayerLayer(player: player)
         playerLayer.videoGravity = AVLayerVideoGravityResizeAspectFill
         playerLayer.zPosition = -1
 
-        playerLayer.frame = self.view.frame
+        playerLayer.frame = view.frame
 
-        self.view.layer.addSublayer(playerLayer)
+        view.layer.addSublayer(playerLayer)
 
-        self.moviePlayer.play()
+        player?.play()
             
         //loop video
         NSNotificationCenter.defaultCenter().addObserver(self,
             selector: "loopVideo",
             name: AVPlayerItemDidPlayToEndTimeNotification,
-            object: self.moviePlayer.currentItem)
+            object: nil)
      }
     
     func loopVideo() {
-        self.moviePlayer.seekToTime(kCMTimeZero)
-        self.moviePlayer.play()
+        player?.seekToTime(kCMTimeZero)
+        player?.play()
     }
 
 }
